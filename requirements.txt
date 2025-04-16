@@ -6,3 +6,6 @@ scikit-learn==1.6.1
 scipy==1.15.2
 requests==2.32.3
 yfinance==0.2.55
+flake8==7.2.0
+pytest==8.3.5
+ipykernel
