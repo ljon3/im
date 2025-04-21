@@ -24,6 +24,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run Daily Valuation
       run: |
-        python valuation/value_daily.py
+        python value_daily.py
         git add .
         git commit -m "completing today's valuation"
+        git push origin main
