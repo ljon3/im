@@ -37,7 +37,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Set PYTHONPATH 
-        run: |
+      run: |
           echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Run Tests
