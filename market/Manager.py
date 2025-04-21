@@ -2,6 +2,9 @@ import os
 import pandas as pd
 import yfinance as yf
 from utilities.utils import fullpath, checkpath
+from utilities.utils import last_day, last_working_day, validate_date
+from utilities.utils import get_datestr
+from datetime import timedelta
 
 class Market:
     # Market class manages the daily market data
@@ -9,37 +12,50 @@ class Market:
     # stores it under the path data/market/{date}
 
     def __init__(self, current_date):
-        self.current_date = str(current_date)
-        self.start_date = "2020-12-31"
-        self.end_date = f"{self.current_date[:4]}-{self.current_date[4:6]}-{self.current_date[6:]}"
+        self.inception_date = validate_date("2020-12-31")
+        self.current_date = validate_date(current_date)
+        self.last_day = last_day(self.current_date)
+        self.last_working_day = last_working_day(self.current_date)
         self.interval = "1d"
 
-    def market_path(self,module):
+        # quarters data - to get most recent quarter
+        quarters = pd.read_csv(fullpath("data","quarters.txt"), names=["qtr"],  skiprows=1)
+        quarters["qtr"] = quarters["qtr"].apply(lambda x: validate_date(x))
+
+        # get prior_weights
+        idx = validate_date(self.current_date) > quarters["qtr"]
+        if any(idx):
+            previous_quarter = max(quarters.loc[idx, "qtr"])        
+        else: 
+            previous_quarter = self.current_date
+        
+        universe_path = fullpath("data","universe","processed",
+                                 get_datestr(previous_quarter)+".csv")
+        
+        self.universe = pd.read_csv(universe_path)
+
+    def path_market(self,module):
         folder_path = fullpath("data", "market", module)
         checkpath(folder_path)
-        return fullpath(folder_path,self.current_date+".csv")
+        return folder_path
 
-    def get_universe(self):
-        universe_path = fullpath("data","universe","processed",self.current_date+".csv")
-        self.universe = pd.read_csv(universe_path)
-        return self.universe
     
     def get_prices(self):
         
-        # get recent universe
-        self.get_universe()
-        
+        # get universe        
         symbols = list(self.universe.loc[:, "symbol"])
-        market_data = yf.download(symbols, start=self.start_date, end=self.end_date, interval=self.interval, group_by="column") 
+        market_data = yf.download(symbols, start=self.last_working_day, end=self.last_working_day, interval=self.interval, group_by="column") 
         market_data = market_data.xs("Close", level=0, axis=1)
-        market_data.to_csv(self.market_path(module="prices"))
+
+        # path_market_data
+        path_market_data = fullpath( self.path_market("prices"), 
+                                     get_datestr(self.current_date)+".csv" )
+        market_data.to_csv(path_market_data)
         return market_data
     
     def get_caps(self):
 
-        # get recent universe
-        self.get_universe()
-
+        # get universe
         symbols = list(self.universe.loc[:, "symbol"])
 
         market_caps = {}
@@ -52,6 +68,23 @@ class Market:
                 market_caps[symbol] = f"Error: {e}"
 
         df_market_caps = pd.DataFrame(list(market_caps.items()), columns=["Symbol", "MarketCap"])
-        df_market_caps.to_csv(self.market_path(module="caps"), index=False)
+
+        # path_market_cap
+        path_market_data = fullpath( self.path_market("caps"), 
+                                     get_datestr(self.current_date)+".csv" )
+        df_market_caps.to_csv(path_market_data, index=False)
         return df_market_caps
 
+    def get_daily_prices(self):
+        
+        # get universe
+        symbols = list(self.universe.loc[:, "symbol"])
+
+        # download market data
+        market_data = yf.download(symbols, start=self.current_date - timedelta(days=120), end=self.current_date, interval=self.interval, group_by="column") 
+        market_data = market_data.xs("Close", level=0, axis=1)
+
+        path_market_data = fullpath( self.path_market("prices"), 
+                                     get_datestr(self.current_date)+".csv" )        
+        market_data.to_csv(path_market_data)
+        return market_data

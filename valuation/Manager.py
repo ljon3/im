@@ -1,30 +1,59 @@
 from decimal import getcontext, Decimal
+from utilities.utils import fullpath, checkpath
+from utilities.utils import last_day, last_working_day, validate_date
+from utilities.utils import get_datestr
 import pandas as pd
 import numpy as np 
 from datetime import datetime
 
 class Valuation:
 
-    def __init__(self, current_date):
-        self.current_date = str(current_date)
+    def __init__(self, current_date, module):
+        self.inception_date = validate_date("2020-12-31")
+        self.current_date = validate_date(current_date)
+        self.last_day = last_day(self.current_date)
+        self.last_working_day = last_working_day(self.current_date)
+        self.module = module
+        
+        # initialize folders
+        self.valuation_paths()
 
-    def valuation_path(self,module):
-        folder_path = fullpath("data", "valuation", module)
-        checkpath(folder_path)
-        return fullpath(folder_path,self.current_date+".csv")
-    
-    def calculate_num_shares_on_rebalance_day(self):
-        weights_path = fullpath("data","strategy","caps",self.current_date+".csv")
-        price_path = fullpath("data", "market", "prices",self.current_date+".csv")
+        # quarters data - to get most recent quarter
+        quarters = pd.read_csv(fullpath("data","quarters.txt"), names=["qtr"],  skiprows=1)
+        quarters["qtr"] = quarters["qtr"].apply(lambda x: validate_date(x))
+
+        # get prior_weights
+        idx = validate_date(self.current_date) > quarters["qtr"]
+        if any(idx):
+            previous_quarter = max(quarters.loc[idx, "qtr"])        
+        else: 
+            previous_quarter = self.current_date
+        
+        self.previous_quarter = previous_quarter
+        self.universe = fullpath("data","universe","processed",
+                                 get_datestr(previous_quarter)+".csv")        
+
+    def valuation_paths(self):
+        self.folder_path_quarterly = fullpath("data", "valuation", "quarterly", self.module)
+        self.folder_path_daily = fullpath("data", "valuation", "daily", self.module)
+        checkpath(self.folder_path_quarterly)
+        checkpath(self.folder_path_daily)
+
+    def valuation_quarterly(self):
+        path_weights = fullpath("data","strategy","caps",get_datestr(self.current_date)+".csv")
+        path_price = fullpath("data", "market", "prices",get_datestr(self.current_date)+".csv")
         ptf_size = 1e9
 
-        weights = pd.read_csv(weights_path)
-        prices = pd.read_csv(price_path)
+        # read weight and price files
+        weights = pd.read_csv(path_weights)
+        prices = pd.read_csv(path_price)
         
+        # convert prices["Date"] to datetime and get just date
         prices['Date'] = pd.to_datetime(prices['Date'])
-        prices['Date'] = prices['Date'].dt.date
+        prices['Date'] = prices['Date']
 
-        price_qtr_end = prices[prices.Date == last_working_day("20231231")].drop("Date", axis=1).transpose()
+        # 
+        price_qtr_end = prices[prices.Date == self.last_working_day].drop("Date", axis=1).transpose()
         price_qtr_end = price_qtr_end.reset_index()
         price_qtr_end.columns = ["Symbol", "Prices"]        
 
@@ -38,11 +67,10 @@ class Valuation:
         df_cash = pd.DataFrame({"Symbol": "cash", "Prices": 1, "Weights": cash/ptf_size, "DollarWeight": cash, "NumShares": cash }, index=range(1))
         df_asset_table = pd.concat([df_prices_weights, df_cash])
 
-        return df_asset_table  
+        df_quarterly_allocation = df_asset_table.loc[df_asset_table["Symbol"] != "cash", ["Symbol", "NumShares"]]
+
+        df_quarterly_allocation.to_csv(fullpath(self.folder_path_quarterly,get_datestr(self.current_date)+".csv"), index=False)
+
+        return df_asset_table, df_quarterly_allocation
     
 
-if __name__ == "__main__":
-    from utilities.utils import fullpath, checkpath, last_working_day
-    value = Valuation(20231231)
-    df = value.calculate_num_shares_on_rebalance_day()
-    print(df)
