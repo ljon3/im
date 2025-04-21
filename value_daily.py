@@ -19,20 +19,24 @@ symbol = df_num_shares["Symbol"].to_list()
 market_data = yf.download(symbol, start=today-t1*7, end=today, interval="1d", group_by="column") 
 market_data = market_data.xs("Close",level=0, axis=1)
 
-# check market data and symbol alignment
-if all(market_data.columns == symbol):
-    prices = np.matrix( market_data.values )
-    num_shares = np.matrix(df_num_shares["NumShares"]).transpose()
+try:
+    # check market data and symbol alignment
+    if all(market_data.columns == symbol):
+        prices = np.matrix( market_data.values )
+        num_shares = np.matrix(df_num_shares["NumShares"]).transpose()
 
-    # check inner size of matrix prior to multiplication
-    if prices.shape[1] == num_shares.shape[0]:
-        portfolio_value = prices @ num_shares
-        df_portfolio_value = pd.DataFrame(portfolio_value, columns=["Portfolio"])
-        df_portfolio_value.index = market_data.index.date
+        # check inner size of matrix prior to multiplication
+        if prices.shape[1] == num_shares.shape[0]:
+            portfolio_value = prices @ num_shares
+            df_portfolio_value = pd.DataFrame(portfolio_value, columns=["Portfolio"])
+            df_portfolio_value.index = market_data.index.date
 
-        # publish daily portfolio value
-        for d in range(len(df_portfolio_value)):
-            current_dte = df_portfolio_value.iloc[d,:].name.strftime("%Y%m%d")
-            fname = fullpath("data","valuation","daily","cw",current_dte+".csv")
-            df_portfolio_value.iloc[[d]].to_csv(fname, index=False,header=False)
-            print(fname)
+            # publish daily portfolio value
+            for d in range(len(df_portfolio_value)):
+                current_dte = df_portfolio_value.iloc[d,:].name.strftime("%Y%m%d")
+                fname = fullpath("data","valuation","daily","cw",current_dte+".csv")
+                df_portfolio_value.iloc[[d]].to_csv(fname, index=False,header=False)
+                print(fname)
+
+except:
+    print("nothing to commit")
