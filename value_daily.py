@@ -35,3 +35,4 @@ if all(market_data.columns == symbol):
             current_dte = df_portfolio_value.iloc[d,:].name.strftime("%Y%m%d")
             fname = fullpath("data","valuation","daily","cw",current_dte+".csv")
             df_portfolio_value.iloc[[d]].to_csv(fname, index=False,header=False)
+            print(fname)
