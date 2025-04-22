@@ -2,7 +2,7 @@ name: Daily Valuation
 
 on:
   schedule:
-    -cron: '00 16 * * 5'
+    -cron: '00 16 * * 2,5'
 
 jobs:
   build:
