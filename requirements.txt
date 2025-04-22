@@ -10,3 +10,4 @@ flake8==7.2.0
 pytest==8.3.5
 ipykernel
 pydantic==2.11.3
+seaborn

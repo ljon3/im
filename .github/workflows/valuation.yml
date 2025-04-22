@@ -1,8 +1,13 @@
 name: Daily Valuation
 
+# on:
+#   schedule:
+#     - cron: '00 18 * * *'
+
 on:
-  schedule:
-    -cron: '00 16 * * 2,5'
+  push:
+    branches:
+      - 'main'
 
 jobs:
   build:
@@ -36,4 +41,9 @@ jobs:
         git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+    - name: Set PYTHONPATH 
+      run: |
+          echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
+    - name: Run Tests
+      run: |
+        pytest
