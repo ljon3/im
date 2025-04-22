@@ -1,9 +1,8 @@
 name: Daily Valuation
 
 on:
-  push:
-    branches:
-      - 'main'
+  schedule:
+    -cron: '00 16 * * 5'
 
 jobs:
   build:
@@ -25,15 +24,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-    - name: Set PYTHONPATH 
-      run: |
-          echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
-          ls /home/runner/work/im/im
-    - name: Run Tests
-      run: |
-        pytest        
-
     - name: Run Daily Valuation
       run: |
         python value_daily.py
