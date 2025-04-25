@@ -3,7 +3,7 @@ Portfolio construction in the context of financial index management
 To get started:
 1. Setup a conda environment using at least python=3.11  
    Access a Windows Subsystem for Linux (WSL) terminal and run  
-   `conda create --name env-index-mgt python=3.5`  
+   `conda create --name env-index-mgt python=3.11`  
    If an environment is already setup, activate it:  
    `conda activate env-index-mgt`  
 
