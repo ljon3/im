@@ -1,4 +1,4 @@
-Portfolio construction in the context of financial index management
+# Portfolio construction in the context of financial index management #
 
 To get started:
 1. Setup a conda environment using at least python=3.11  
@@ -17,7 +17,7 @@ To get started:
 
 Workflows included in this repo:  
 
-* Workflow 1: Portfolio construction  
+* ## Workflow 1: Portfolio construction ##  
   In this piece i demonstrate the different modules that are put together to manage an index construction workflow robustly. The files of interest are:  
   `driver-strategy.ipynb`  
   `driver-market.ipynb`  
@@ -31,11 +31,11 @@ Workflows included in this repo:
   Verify this is the port displayed when you run the   
   `streamlit run app_portfolio_visualize.py` 
 
-* Workflow 2: Unit Testing  
+* ## Workflow 2: Unit Testing ##  
   An integral part of development workflows is testing. I have setup tests in the respective folders. To run the tests, execute:  
   `pytest`
 
-* Workflow 3: Automation Workflows for CI/CD  
+* ## Workflow 3: Automation Workflows for CI/CD ##  
   Finally, to initiate automatically daily valuation workflows, I have setup Github Actions to run automatically. As of now, I have set it up to run on Fridays. This is configured in the file:  
   `.github/workflows/valuation.yml`   
   This can be visualized at: https://github.com/ljon3/index-management/actions
