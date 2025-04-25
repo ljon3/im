@@ -40,7 +40,7 @@ class Valuation:
         checkpath(self.folder_path_daily)
 
     def valuation_quarterly(self):
-        path_weights = fullpath("data","strategy","caps",get_datestr(self.current_date)+".csv")
+        path_weights = fullpath("data","strategy",self.module,get_datestr(self.current_date)+".csv")
         path_price = fullpath("data", "market", "prices",get_datestr(self.current_date)+".csv")
         ptf_size = 1e9
 
@@ -55,8 +55,8 @@ class Valuation:
         # 
         price_qtr_end = prices[prices.Date == self.last_working_day].drop("Date", axis=1).transpose()
         price_qtr_end = price_qtr_end.reset_index()
-        price_qtr_end.columns = ["Symbol", "Prices"]        
-
+        price_qtr_end.columns = ["Symbol", "Prices"]    
+        
         df_prices_weights = pd.merge(price_qtr_end, weights, left_on="Symbol", right_on="Symbol")
         df_prices_weights["DollarWeight"] = df_prices_weights["Weights"].apply(lambda x: ptf_size*x )
         df_prices_weights["NumShares"] = df_prices_weights["DollarWeight"].values / df_prices_weights["Prices"].values    
@@ -71,6 +71,6 @@ class Valuation:
 
         df_quarterly_allocation.to_csv(fullpath(self.folder_path_quarterly,get_datestr(self.current_date)+".csv"), index=False)
 
-        return df_asset_table, df_quarterly_allocation
+        return df_quarterly_allocation
     
 

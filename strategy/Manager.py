@@ -81,7 +81,7 @@ class CapWeight(BaseStrategy):
 
         df_weights = pd.merge(prior_weights, new_weights, on="Symbol", suffixes=('_old', '_new'))
 
-        return prior_weights, new_weights, df_weights
+        return prior_weights, df_weights
 
 class MaxSharpeRatioPortfolio(BaseStrategy):
 
@@ -134,7 +134,7 @@ class MaxSharpeRatioPortfolio(BaseStrategy):
         # max sharpe ratio optim - objective function
         def max_sharpe_ratio(weights, cov_matrix):
             portfolio_return = np.dot(weights, expected_returns)
-            portfolio_volatility = np.dot(weights.transpose(), np.dot(cov_matrix, weights))
+            portfolio_volatility = np.dot(weights.transpose(), np.dot(cov_matrix, weights)) ** 1/2
             msr = (portfolio_return - self.risk_free_rate/12) / portfolio_volatility
             return -msr 
 
@@ -154,7 +154,7 @@ class MaxSharpeRatioPortfolio(BaseStrategy):
         df_weights["Weight_LW"] = df_weights["Weight_LW"].apply(lambda x: 0 if x < 1e-6 else x)
 
         df_to_write = df_weights.loc[:,["Asset","Weight_LW"]]
-        df_to_write.columns = ["Asset","Weights"]
+        df_to_write.columns = ["Symbol","Weights"]
         df_to_write.to_csv(fullpath( self.path_strategy("msr"), 
                                                   get_datestr(self.current_date)+".csv" ), index=False)
 

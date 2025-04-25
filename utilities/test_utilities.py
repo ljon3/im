@@ -3,7 +3,7 @@ from utilities.utils import fullpath, get_datestr, get_datetime, last_working_da
 from datetime import datetime
 import pandas as pd
 
-class TestMyModule(unittest.TestCase):
+class TestUtilities(unittest.TestCase):
 
     def test_datetime(self):
         self.assertEqual(get_datetime( get_datestr(20231231) ), datetime(2023,12,31))

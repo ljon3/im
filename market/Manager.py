@@ -44,7 +44,7 @@ class Market:
         
         # get universe        
         symbols = list(self.universe.loc[:, "symbol"])
-        market_data = yf.download(symbols, start=self.last_working_day, end=self.last_working_day, interval=self.interval, group_by="column") 
+        market_data = yf.download(symbols, start=self.inception_date, end=self.last_working_day+timedelta(days=5), interval=self.interval, group_by="column") 
         market_data = market_data.xs("Close", level=0, axis=1)
 
         # path_market_data
@@ -81,7 +81,7 @@ class Market:
         symbols = list(self.universe.loc[:, "symbol"])
 
         # download market data
-        market_data = yf.download(symbols, start=self.current_date - timedelta(days=120), end=self.current_date, interval=self.interval, group_by="column") 
+        market_data = yf.download(symbols, start=self.current_date - timedelta(days=120), end=self.current_date + timedelta(days=3), interval=self.interval, group_by="column") 
         market_data = market_data.xs("Close", level=0, axis=1)
 
         path_market_data = fullpath( self.path_market("prices"), 
