@@ -2,5 +2,5 @@
 
 export PYTHONPATH='/mnt/c/Users/ljohny/WorkspaceRough/projects/indexManagement/'
 conda deactivate
-conda activate idx
+conda activate env-index-mgt
 code .
