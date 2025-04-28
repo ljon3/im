@@ -16,7 +16,7 @@ df_num_shares = pd.read_csv(fullpath( value.folder_path_quarterly, get_datestr(v
 
 symbol = df_num_shares["Symbol"].to_list()
 
-market_data = yf.download(symbol, start=today-t1*7, end=today, interval="1d", group_by="column") 
+market_data = yf.download(symbol, start=today-t1*7, end=today, interval="1d", group_by="column", auto_adjust=True) 
 market_data = market_data.xs("Close",level=0, axis=1)
 
 try:
