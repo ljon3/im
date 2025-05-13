@@ -1,11 +1,11 @@
 name: Daily Valuation
 
 on:
-  schedule:
-    - cron: '00 18 * * 5'
-  # push:
-  #   branches:
-  #     - 'main'
+#  schedule:
+#    - cron: '00 18 * * 5'
+  push:
+   branches:
+       - 'main'
 
 jobs:
   build:
